@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Калькулятор — Задание #6</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .calculator {
+      background: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(12px);
+      border-radius: 20px;
+      padding: 24px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      width: 320px;
+    }
+
+    .display {
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 12px;
+      padding: 16px 20px;
+      margin-bottom: 20px;
+      text-align: right;
+      min-height: 80px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .display .expression {
+      color: rgba(255, 255, 255, 0.5);
+      font-size: 14px;
+      min-height: 20px;
+      word-break: break-all;
+    }
+
+    .display .current {
+      color: #fff;
+      font-size: 32px;
+      font-weight: 300;
+      word-break: break-all;
+      margin-top: 4px;
+    }
+
+    .buttons {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+
+    .btn {
+      padding: 18px;
+      font-size: 18px;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      font-family: inherit;
+      font-weight: 500;
+    }
+
+    .btn:active {
+      transform: scale(0.95);
+    }
+
+    .btn-number {
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+    }
+
+    .btn-number:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .btn-operator {
+      background: rgba(99, 102, 241, 0.6);
+      color: #fff;
+    }
+
+    .btn-operator:hover {
+      background: rgba(99, 102, 241, 0.8);
+    }
+
+    .btn-action {
+      background: rgba(239, 68, 68, 0.5);
+      color: #fff;
+    }
+
+    .btn-action:hover {
+      background: rgba(239, 68, 68, 0.7);
+    }
+
+    .btn-equals {
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      color: #fff;
+      grid-column: span 2;
+    }
+
+    .btn-equals:hover {
+      background: linear-gradient(135deg, #818cf8, #a78bfa);
+    }
+
+    .btn-zero {
+      grid-column: span 2;
+    }
+  </style>
+</head>
+<body>
+  <div class="calculator">
+    <div class="display">
+      <div class="expression" id="expression"></div>
+      <div class="current" id="current">0</div>
+    </div>
+    <div class="buttons">
+      <button class="btn btn-action" onclick="clearAll()">C</button>
+      <button class="btn btn-action" onclick="backspace()">⌫</button>
+      <button class="btn btn-operator" onclick="inputOperator('%')">%</button>
+      <button class="btn btn-operator" onclick="inputOperator('/')">÷</button>
+
+      <button class="btn btn-number" onclick="inputNumber('7')">7</button>
+      <button class="btn btn-number" onclick="inputNumber('8')">8</button>
+      <button class="btn btn-number" onclick="inputNumber('9')">9</button>
+      <button class="btn btn-operator" onclick="inputOperator('*')">×</button>
+
+      <button class="btn btn-number" onclick="inputNumber('4')">4</button>
+      <button class="btn btn-number" onclick="inputNumber('5')">5</button>
+      <button class="btn btn-number" onclick="inputNumber('6')">6</button>
+      <button class="btn btn-operator" onclick="inputOperator('-')">−</button>
+
+      <button class="btn btn-number" onclick="inputNumber('1')">1</button>
+      <button class="btn btn-number" onclick="inputNumber('2')">2</button>
+      <button class="btn btn-number" onclick="inputNumber('3')">3</button>
+      <button class="btn btn-operator" onclick="inputOperator('+')">+</button>
+
+      <button class="btn btn-number btn-zero" onclick="inputNumber('0')">0</button>
+      <button class="btn btn-number" onclick="inputDot()">.</button>
+      <button class="btn btn-equals" onclick="calculate()">=</button>
+    </div>
+  </div>
+
+  <script>
+    let currentValue = '0';
+    let previousValue = '';
+    let operator = null;
+    let shouldResetScreen = false;
+
+    const currentDisplay = document.getElementById('current');
+    const expressionDisplay = document.getElementById('expression');
+
+    function updateDisplay() {
+      currentDisplay.textContent = currentValue;
+    }
+
+    function inputNumber(num) {
+      if (currentValue === '0' || shouldResetScreen) {
+        currentValue = num;
+        shouldResetScreen = false;
+      } else {
+        if (currentValue.length >= 15) return;
+        currentValue += num;
+      }
+      updateDisplay();
+    }
+
+    function inputDot() {
+      if (shouldResetScreen) {
+        currentValue = '0';
+        shouldResetScreen = false;
+      }
+      if (!currentValue.includes('.')) {
+        currentValue += '.';
+      }
+      updateDisplay();
+    }
+
+    function inputOperator(op) {
+      if (operator && !shouldResetScreen) {
+        calculate();
+      }
+      previousValue = currentValue;
+      operator = op;
+      shouldResetScreen = true;
+
+      const opSymbols = { '+': '+', '-': '−', '*': '×', '/': '÷', '%': '%' };
+      expressionDisplay.textContent = `${previousValue} ${opSymbols[op]}`;
+    }
+
+    function calculate() {
+      if (!operator || shouldResetScreen) return;
+
+      const prev = parseFloat(previousValue);
+      const curr = parseFloat(currentValue);
+      let result;
+
+      switch (operator) {
+        case '+': result = prev + curr; break;
+        case '-': result = prev - curr; break;
+        case '*': result = prev * curr; break;
+        case '/':
+          if (curr === 0) {
+            currentValue = 'Ошибка';
+            expressionDisplay.textContent = '';
+            operator = null;
+            updateDisplay();
+            shouldResetScreen = true;
+            return;
+          }
+          result = prev / curr;
+          break;
+        case '%': result = prev % curr; break;
+      }
+
+      const opSymbols = { '+': '+', '-': '−', '*': '×', '/': '÷', '%': '%' };
+      expressionDisplay.textContent = `${previousValue} ${opSymbols[operator]} ${currentValue} =`;
+
+      // Округляем для избежания проблем с плавающей точкой
+      currentValue = parseFloat(result.toFixed(10)).toString();
+      operator = null;
+      shouldResetScreen = true;
+      updateDisplay();
+    }
+
+    function clearAll() {
+      currentValue = '0';
+      previousValue = '';
+      operator = null;
+      shouldResetScreen = false;
+      expressionDisplay.textContent = '';
+      updateDisplay();
+    }
+
+    function backspace() {
+      if (shouldResetScreen || currentValue === 'Ошибка') {
+        clearAll();
+        return;
+      }
+      currentValue = currentValue.slice(0, -1) || '0';
+      updateDisplay();
+    }
+
+    // Поддержка клавиатуры
+    document.addEventListener('keydown', (e) => {
+      if (e.key >= '0' && e.key <= '9') inputNumber(e.key);
+      else if (e.key === '.') inputDot();
+      else if (e.key === '+') inputOperator('+');
+      else if (e.key === '-') inputOperator('-');
+      else if (e.key === '*') inputOperator('*');
+      else if (e.key === '/') { e.preventDefault(); inputOperator('/'); }
+      else if (e.key === '%') inputOperator('%');
+      else if (e.key === 'Enter' || e.key === '=') calculate();
+      else if (e.key === 'Backspace') backspace();
+      else if (e.key === 'Escape') clearAll();
+    });
+  </script>
+</body>
+</html>
