@@ -7,6 +7,7 @@
 ## Что внутри
 
 - `calculator.html` — калькулятор
+- `circle.js` — класс окружности
 - `string_stats.js`, `swap_case.js` — работа со строками
 - `file_replace.js` — замена в файле
 - `news_feed.js` — лента новостей
